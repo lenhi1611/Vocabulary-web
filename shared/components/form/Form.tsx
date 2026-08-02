@@ -1,6 +1,6 @@
 "use client";
 
-import { ButtonHTMLAttributes, ReactNode, createContext, useContext, useEffect } from "react";
+import { ComponentProps, ReactNode, createContext, useContext, useEffect } from "react";
 import {
   DefaultValues,
   FieldPath,
@@ -13,6 +13,10 @@ import {
   UseFormProps,
   UseFormReturn,
 } from "react-hook-form";
+
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Spinner } from "@/components/ui/spinner";
 
 export type FormProps<T extends FieldValues = FieldValues> = {
   children: ReactNode;
@@ -66,16 +70,6 @@ export function Form<T extends FieldValues = FieldValues>({
   );
 }
 
-export function FormDebug<T extends FieldValues = FieldValues>() {
-  const form = useFormContext<T>();
-
-  useEffect(() => {
-    console.log("form errors:", form.formState.errors);
-  }, [form.formState.errors]);
-
-  return null;
-}
-
 export function useFormContext<T extends FieldValues = FieldValues>() {
   const context = useContext(FormContext);
 
@@ -90,25 +84,22 @@ export function SubmitButton({
   children,
   className,
   disabled,
+  isLoading,
   ...buttonProps
-}: ButtonHTMLAttributes<HTMLButtonElement>) {
+}: ComponentProps<typeof Button> & { isLoading?: boolean }) {
   const form = useFormContext();
   const isDisabled = disabled || !form.formState.isValid;
 
   return (
-    <button
+    <Button
       type="submit"
       disabled={isDisabled}
-      className={[
-        "w-full rounded-2xl bg-zinc-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      className={cn("w-full", className)}
       {...buttonProps}
     >
+        {isLoading ? <Spinner /> : null}
       {children}
-    </button>
+    </Button>
   );
 }
 
