@@ -1,46 +1,58 @@
 "use client";
 
-import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { signUpSchema, SignUpValues } from "../schemas/signUp.schema";
-import { authService } from "../services/auth.service";
-import { AuthLayout } from "./AuthLayout";
-import { Form, FormDebug, SubmitButton } from "@/shared/components/form/Form";
+import { selectSignUp, signUp } from "../store/auth.slice";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Form, SubmitButton } from "@/shared/components/form/Form";
 import { TextField } from "@/shared/components/form/TextField";
 import { SelectField } from "@/shared/components/form/SelectField";
 import { CheckboxField } from "@/shared/components/form/CheckboxField";
+import { useAppDispatch, useAppSelector } from "@/shared/store/hooks";
+import { RequestStatus } from "@/shared/store/requestStatus";
+import AuthLayout from "./AuthLayout";
+import { toast } from "@/components/ui/toast";
+import { useEffect } from "react";
 
 export function SignupForm() {
-  const [status, setStatus] = useState<string>("Create your account to get started.");
+  const dispatch = useAppDispatch();
+  const { status, error } = useAppSelector(selectSignUp);
+  const isLoading = status === RequestStatus.Loading;
+  const isFailed = status === RequestStatus.Failed;
+  const isSucceeded = status === RequestStatus.Succeeded;
 
-  const handleSubmit = async (values: SignUpValues) => {
-    const result = await authService.signUp(values);
-    setStatus(result.message);
+  const handleSubmit = (values: SignUpValues) => {
+    dispatch(signUp(values)).then((result) => {
+        console.log("Signup result:", result);
+      if (result.meta.requestStatus === "fulfilled") {
+        // Handle successful signup, e.g., redirect to a different page or show a success message
+        toast.add({
+          type: "success",
+          description: "Account created successfully!",
+        });
+      }
+    });
   };
 
   return (
-    <AuthLayout
-      eyebrow="Join the studio"
-      heroTitle="Build a richer vocabulary routine in minutes."
-      heroDescription="Create your account and start your learning journey with a calm, structured experience."
-      panelLabel="Create account"
-      heading="Sign up"
-      navLink={{ href: "/signin", label: "Sign in" }}
-      gridClassName="lg:grid-cols-[0.95fr_1.05fr]"
-      footer={<p className="mt-6 text-sm text-zinc-600">{status}</p>}
-    >
+    <AuthLayout>
       <Form<SignUpValues>
         className="mt-8 space-y-5"
-        defaultValues={{ fullName: "", email: "", password: "", confirmPassword: "", role: "", agreeToTerms: false }}
+        defaultValues={{
+          fullName: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          role: "",
+          agreeToTerms: false,
+        }}
         onSubmit={handleSubmit}
         options={{
           mode: "onChange",
           resolver: zodResolver(signUpSchema),
         }}
       >
-        <FormDebug<SignUpValues> />
-
         <TextField<SignUpValues>
           name="fullName"
           label="Full name"
@@ -84,7 +96,16 @@ export function SignupForm() {
           label="I agree to the terms and privacy policy"
         />
 
-        <SubmitButton>Create account</SubmitButton>
+        {isFailed && error ? (
+          <Alert variant="destructive">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : null}
+
+        <SubmitButton disabled={isLoading} isLoading={isLoading}>
+          {isLoading ? "Creating account..." : "Create account"}
+        </SubmitButton>
       </Form>
     </AuthLayout>
   );
