@@ -5,7 +5,11 @@ import { SignInValues } from "../schemas/signIn.schema";
 import { SignUpValues } from "../schemas/signUp.schema";
 import { authService } from "../services/auth.service";
 import { AuthResult, AuthUser } from "../types/auth";
-import { initialRequestState, RequestState, RequestStatus } from "@/shared/store/requestStatus";
+import {
+  initialRequestState,
+  RequestState,
+  RequestStatus,
+} from "@/shared/store/requestStatus";
 
 type AuthState = {
   user: AuthUser | null;
@@ -26,27 +30,35 @@ function extractErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
-export const signIn = createAsyncThunk<AuthResult, SignInValues, { rejectValue: string }>(
-  "auth/signIn",
-  async (values, { rejectWithValue }) => {
-    try {
-      return await authService.signIn(values);
-    } catch (error) {
-      return rejectWithValue(extractErrorMessage(error, "Unable to sign in"));
-    }
+export const signIn = createAsyncThunk<
+  AuthResult,
+  SignInValues,
+  { rejectValue: string }
+>("auth/signIn", async (values, { rejectWithValue }) => {
+  try {
+    return await authService.signIn(values);
+  } catch (error) {
+    return rejectWithValue(extractErrorMessage(error, "Unable to sign in"));
   }
-);
+});
 
-export const signUp = createAsyncThunk<AuthResult, SignUpValues, { rejectValue: string }>(
-  "auth/signUp",
-  async (values, { rejectWithValue }) => {
-    try {
-      return await authService.signUp(values);
-    } catch (error) {
-      return rejectWithValue(extractErrorMessage(error, "Unable to create account"));
-    }
+export const signUp = createAsyncThunk<
+  AuthResult,
+  SignUpValues,
+  { rejectValue: string }
+>("auth/signUp", async (values, { rejectWithValue }) => {
+  try {
+    return await authService.signUp(values);
+  } catch (error) {
+    return rejectWithValue(
+      extractErrorMessage(error, "Unable to create account"),
+    );
   }
-);
+});
+
+export const logout = createAsyncThunk("auth/logout", async () => {
+  await authService.logout().catch(() => undefined);
+});
 
 const authSlice = createSlice({
   name: "auth",
@@ -87,6 +99,9 @@ const authSlice = createSlice({
       .addCase(signUp.rejected, (state, action) => {
         state.signUp.status = RequestStatus.Failed;
         state.signUp.error = action.payload ?? "Unable to create account";
+      })
+      .addCase(logout.fulfilled, (state) => {
+        state.user = null;
       });
   },
 });
@@ -94,6 +109,7 @@ const authSlice = createSlice({
 export const { setCredentials, clearCredentials } = authSlice.actions;
 export const authReducer = authSlice.reducer;
 
-export const selectCurrentUser = (state: { auth: AuthState }) => state.auth.user;
+export const selectCurrentUser = (state: { auth: AuthState }) =>
+  state.auth.user;
 export const selectSignIn = (state: { auth: AuthState }) => state.auth.signIn;
 export const selectSignUp = (state: { auth: AuthState }) => state.auth.signUp;
