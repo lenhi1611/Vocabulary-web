@@ -48,3 +48,5 @@ CLAUDE.md
 .claude/skills/
 .windsurf/skills/
 .agents/skills/
+
+**/node_modules/

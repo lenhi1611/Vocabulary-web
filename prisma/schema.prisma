@@ -19,7 +19,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   refreshTokens RefreshToken[]
-
+  decks         Deck[] 
 }
 
 model RefreshToken {
@@ -29,4 +29,39 @@ model RefreshToken {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+enum DeckLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model Deck {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  level       DeckLevel  @default(BEGINNER)
+  topic       String?
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cards       Card[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model Card {
+  id           String   @id @default(cuid())
+  word         String
+  phonetic     String?  // /həˈloʊ/
+  meaning      String   // nghĩa tiếng Việt
+  example      String?  // câu ví dụ
+  deckId       String
+  deck         Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([deckId])
 }
