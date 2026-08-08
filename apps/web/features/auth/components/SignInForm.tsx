@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { signInSchema, SignInValues } from "../schemas/signIn.schema";
 import { selectSignIn, signIn } from "../store/auth.slice";
@@ -10,12 +10,12 @@ import { TextField } from "@/shared/components/form/TextField";
 import { useAppDispatch, useAppSelector } from "@/shared/store/hooks";
 import { RequestStatus } from "@/shared/store/requestStatus";
 import AuthLayout from "./AuthLayout";
-import { toast } from "@/components/ui/toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function SignInForm() {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { status, error } = useAppSelector(selectSignIn);
   const isLoading = status === RequestStatus.Loading;
   const isFailed = status === RequestStatus.Failed;
@@ -24,7 +24,9 @@ export function SignInForm() {
     dispatch(signIn(values)).then((result) => {
       console.log("SignIn result:", result);
       if (result.meta.requestStatus === "fulfilled") {
-        router.push("/dashboard"); // Redirect to the dashboard page after successful sign-in
+        const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+
+        router.push(callbackUrl); // Redirect to the dashboard page after successful sign-in
       }
     });
   };
