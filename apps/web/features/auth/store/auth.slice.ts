@@ -10,6 +10,7 @@ import {
   RequestState,
   RequestStatus,
 } from "@/shared/store/requestStatus";
+import { extractErrorMessage } from "@/shared/utils";
 
 type AuthState = {
   user: AuthUser | null;
@@ -23,12 +24,7 @@ const initialState: AuthState = {
   signUp: { ...initialRequestState },
 };
 
-function extractErrorMessage(error: unknown, fallback: string): string {
-  if (axios.isAxiosError(error)) {
-    return error.response?.data?.message ?? fallback;
-  }
-  return fallback;
-}
+
 
 export const signIn = createAsyncThunk<
   AuthResult,
