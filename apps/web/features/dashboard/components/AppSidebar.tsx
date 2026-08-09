@@ -40,10 +40,10 @@ import { useAppDispatch } from "@/shared/store/hooks";
 
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/dashboard/decks", label: "My Deck", icon: Layers },
-  { href: "/dashboard/games", label: "Games", icon: Gamepad2 },
-  { href: "/dashboard/reviews", label: "Reviews", icon: RotateCcw },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+  { href: "/decks", label: "My Deck", icon: Layers },
+  { href: "/games", label: "Games", icon: Gamepad2 },
+  { href: "/reviews", label: "Reviews", icon: RotateCcw },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function AppSidebar() {
