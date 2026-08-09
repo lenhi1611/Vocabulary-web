@@ -14,11 +14,12 @@
 /coverage
 
 # next.js
-/.next/
-/out/
+.next/
+out/
 
 # production
-/build
+build/
+dist/
 
 # misc
 .DS_Store
@@ -48,3 +49,5 @@ CLAUDE.md
 .claude/skills/
 .windsurf/skills/
 .agents/skills/
+
+**/node_modules/

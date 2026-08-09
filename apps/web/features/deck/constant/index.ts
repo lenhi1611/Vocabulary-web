@@ -1,0 +1,1 @@
+export const DECK_LEVEL = ["BEGINNER", "INTERMEDIATE", "ADVANCED"] as const
