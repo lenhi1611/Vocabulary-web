@@ -1,21 +1,32 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, Flame } from "lucide-react";
-import { CreateDeckDialog } from "../components/CreateDeckDialog";
-import { DeckCard } from "../components/DeckCard";
+import { ArrowRight, Flame, Loader2 } from "lucide-react";
+import { CreateDeckDialog } from "@/features/deck/components/CreateDeckDialog";
+import { DeckCard } from "@/features/deck/components/DeckCard";
+import {
+  fetchDecks,
+  selectDecks,
+  selectFetchDecksError,
+  selectFetchDecksLoading,
+} from "@/features/deck/store/deck.slice";
 import { ProgressPanel } from "../components/ProgressPanel";
 import { StatCards } from "../components/StatCards";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { currentUser, decks } from "@/lib/mock-data";
-
-export const metadata: Metadata = {
-  title: "Dashboard — Lexi",
-  description: "Your decks, streak and daily review queue.",
-};
+import { currentUser } from "@/lib/mock-data";
+import { useAppDispatch, useAppSelector } from "@/shared/store/hooks";
 
 export default function DashboardPage() {
-  const dueTotal = decks.reduce((total, deck) => total + deck.dueToday, 0);
+  const dispatch = useAppDispatch();
+  const decks = useAppSelector(selectDecks);
+  const isLoading = useAppSelector(selectFetchDecksLoading);
+  const error = useAppSelector(selectFetchDecksError);
+
+  useEffect(() => {
+    dispatch(fetchDecks());
+  }, [dispatch]);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
@@ -26,7 +37,7 @@ export default function DashboardPage() {
               Hi {currentUser.name.split(" ")[0]}, ready for a round?
             </h1>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              You have {dueTotal} cards waiting across {decks.length} decks.
+              You have {decks.length} decks ready to study.
             </p>
           </div>
           <CreateDeckDialog />
@@ -53,7 +64,7 @@ export default function DashboardPage() {
               variant="secondary"
               size="lg"
               className="h-10 shrink-0"
-              render={<Link href="/decks/ielts-academic/study" />}
+              render={<Link href="/decks" />}
             >
               Start today&apos;s review
               <ArrowRight data-icon="inline-end" />
@@ -71,11 +82,25 @@ export default function DashboardPage() {
                 {decks.length} decks
               </span>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {decks.map((deck) => (
-                <DeckCard key={deck.id} deck={deck} />
-              ))}
-            </div>
+
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
+                <Loader2 className="size-4 animate-spin" />
+                Loading decks...
+              </div>
+            ) : error ? (
+              <p className="py-12 text-center text-sm text-destructive">{error}</p>
+            ) : decks.length === 0 ? (
+              <p className="py-12 text-center text-sm text-muted-foreground">
+                You don&apos;t have any decks yet.
+              </p>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {decks.map((deck) => (
+                  <DeckCard key={deck.id} deck={deck} />
+                ))}
+              </div>
+            )}
           </section>
 
           <aside className="flex flex-col gap-4">

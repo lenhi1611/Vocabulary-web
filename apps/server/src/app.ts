@@ -16,7 +16,7 @@ app.use(cors({
 }))
 
 app.use("/api/auth", authRouter)
+app.use("/api/decks", deckRouter)
+app.use("/api", cardRouter)
 
 app.use(errorMiddleware)
-app.use("/api/decks", deckRouter)
-app.use("/api/cards", cardRouter)

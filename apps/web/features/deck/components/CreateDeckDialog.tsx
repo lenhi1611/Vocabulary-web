@@ -9,25 +9,17 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Form, SubmitButton } from "@/shared/components/form/Form";
+import { ToggleGroupField } from "@/shared/components/form/ToggleGroupField";
 import {
   CreateDeckFormData,
   createDeckSchema,
 } from "@/features/deck/schemas/deck.schema";
+import { DECK_LEVEL } from "@/features/deck/constant";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TextField } from "@/shared/components/form/TextField";
 import { useAppDispatch } from "@/shared/store/hooks";
@@ -37,12 +29,14 @@ import {
 } from "@/features/deck/store/deck.slice";
 import { useSelector } from "react-redux";
 
-const levels = ["Beginner", "Intermediate", "Advanced"];
+const levelOptions = DECK_LEVEL.map((level) => ({
+  label: level.charAt(0) + level.slice(1).toLowerCase(),
+  value: level,
+}));
 
 export function CreateDeckDialog() {
   const dispatch = useAppDispatch();
   const [open, setOpen] = useState(false);
-  const [level, setLevel] = useState<string[]>(["Beginner"]);
 
   const isLoading = useSelector(selectCreateDeckLoading);
   async function handleSubmit(values: CreateDeckFormData) {
@@ -80,6 +74,7 @@ export function CreateDeckDialog() {
         <Form<CreateDeckFormData>
           className="py-6"
           onSubmit={handleSubmit}
+          defaultValues={{ level: "BEGINNER" }}
           options={{
             mode: "onChange",
             resolver: zodResolver(createDeckSchema),
@@ -99,21 +94,12 @@ export function CreateDeckDialog() {
             className="mb-2"
           />
 
-          <Field>
-            <FieldLabel>Level</FieldLabel>
-            <ToggleGroup
-              value={level}
-              onValueChange={setLevel}
-              variant="outline"
-              className="w-full"
-            >
-              {levels.map((item) => (
-                <ToggleGroupItem key={item} value={item} className="flex-1">
-                  {item}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </Field>
+          <ToggleGroupField<CreateDeckFormData>
+            name="level"
+            label="Level"
+            options={levelOptions}
+            className="mb-2"
+          />
           <div className="mt-7 flex justify-end items-end gap-2">
             <DialogClose
               render={<Button variant="ghost" size="lg" type="button" />}
