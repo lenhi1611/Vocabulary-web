@@ -8,7 +8,7 @@ export const deckController = {
       const userId = req.user!.userId;
       const page = Math.max(1, Number(req.query.page ?? 1));
       const limit = Math.max(10, Number(req.query.limit ?? 10));
-      const result = deckService.getDecksByUserId(userId, page, limit);
+      const result = await deckService.getDecksByUserId(userId, page, limit);
       handleSuccessResponse(res, result);
     } catch (error) {
       next(error);

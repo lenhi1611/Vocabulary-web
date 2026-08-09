@@ -5,19 +5,29 @@ import { createDeckInput, updateDeckInput } from "./deck.types";
 export const deckService = {
   getDecksByUserId: async (userId: string, page: number, limit: number) => {
     const skip = (page - 1) * limit;
-    const [decks, totalDecks] = await prisma.$transaction([
+    const [decks, total] = await prisma.$transaction([
       prisma.deck.findMany({
         where: { userId },
         skip,
         take: limit,
+        include: {
+          _count: { select: { cards: true } },
+        },
       }),
       prisma.deck.count({ where: { userId } }),
     ]);
+    const totalPages = Math.ceil(total / limit);
 
     return {
       decks,
-      totalDecks,
-      totalPages: Math.ceil(totalDecks / limit),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
     };
   },
 
