@@ -41,20 +41,24 @@ export const cardService = {
     };
   },
   async createCard(input: CreateCardInput) {
-    const { word, meaning, ...rest } = input;
+    const { word, meaning, userId, deckId, ...rest } = input;
     if (!word.trim() || !meaning.trim()) {
       throw new BadRequestError("Word and meaning are required");
     }
     const deck = await prisma.deck.findUnique({
-      where: { id: input.deckId },
+      where: { id: deckId },
     });
     if (!deck) {
       throw new NotFoundError("Deck not found");
     }
+    if (deck.userId !== userId) {
+      throw new ForbiddenError();
+    }
     return prisma.card.create({
       data: {
         word: word.trim(),
-        meaning: word.trim(),
+        meaning: meaning.trim(),
+        deckId,
         ...rest,
       },
     });
@@ -68,7 +72,7 @@ export const cardService = {
     if (!card) {
       throw new NotFoundError("Card not found");
     }
-    if (card.deck.id !== userId) {
+    if (card.deck.userId !== userId) {
       throw new ForbiddenError();
     }
     return prisma.card.update({

@@ -9,7 +9,7 @@ export const cardController = {
       const userId = req.user!.userId;
       const deckId = req.params.deckId as string;
       const cursor = req.query.cursor as string | undefined;
-      const limit = Math.max(50, Number(req.query.limit) ?? 20);
+      const limit = Number(req.query.limit ?? 20);
 
       const result = await cardService.getCards(deckId, userId, limit, cursor);
 
@@ -22,7 +22,7 @@ export const cardController = {
   async createCard(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.userId;
-      const deckId = req.query.deckId;
+      const deckId = req.params.deckId as string;
       const data = req.body;
       const card = await cardService.createCard({ ...data, userId, deckId });
 
@@ -38,7 +38,7 @@ export const cardController = {
   async updateCard(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.userId;
-      const cardId = req.query.id as string;
+      const cardId = req.params.id as string;
 
       const card = await cardService.updateCard(req.body, cardId, userId);
 
@@ -51,7 +51,7 @@ export const cardController = {
   async deleteCard(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.userId;
-      const cardId = req.query.id as string;
+      const cardId = req.params.id as string;
       await cardService.deleteCard(cardId, userId);
 
       handleSuccessResponse(res, null, { message: "Deleted card" });
