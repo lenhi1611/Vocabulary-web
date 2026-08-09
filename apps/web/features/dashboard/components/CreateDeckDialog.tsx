@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast"
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,21 +23,44 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Form, SubmitButton } from "@/shared/components/form/Form";
+import {
+  CreateDeckFormData,
+  createDeckSchema,
+} from "@/features/deck/schemas/deck.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { TextField } from "@/shared/components/form/TextField";
+import { useAppDispatch } from "@/shared/store/hooks";
+import {
+  createDeck,
+  selectCreateDeckLoading,
+} from "@/features/deck/store/deck.slice";
+import { useSelector } from "react-redux";
 
 const levels = ["Beginner", "Intermediate", "Advanced"];
 
 export function CreateDeckDialog() {
+  const dispatch = useAppDispatch();
   const [open, setOpen] = useState(false);
   const [level, setLevel] = useState<string[]>(["Beginner"]);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const title =
-      new FormData(event.currentTarget).get("title")?.toString() || "New deck";
-    setOpen(false);
-    toast.success(`Deck "${title}" created`, {
-      description: "This is a UI demo, so nothing was saved.",
-    });
+  const isLoading = useSelector(selectCreateDeckLoading);
+  async function handleSubmit(values: CreateDeckFormData) {
+    try {
+      const deck = await dispatch(createDeck(values)).unwrap();
+      toast.add({
+        title: "Deck created",
+        description: `"${deck.name}" is ready to study.`,
+        type: "success",
+      });
+      setOpen(false);
+    } catch (error) {
+      toast.add({
+        title: "Failed to create deck",
+        description: typeof error === "string" ? error : "Something went wrong",
+        type: "error",
+      });
+    }
   }
 
   return (
@@ -47,68 +70,66 @@ export function CreateDeckDialog() {
         New deck
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle className="font-display">
-              Create a new deck
-            </DialogTitle>
-            <DialogDescription>
-              Group words by topic so every study session stays focused.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogHeader>
+          <DialogTitle className="font-display">Create a new deck</DialogTitle>
+          <DialogDescription>
+            Group words by topic so every study session stays focused.
+          </DialogDescription>
+        </DialogHeader>
 
-          <FieldGroup className="py-6">
-            <Field>
-              <FieldLabel htmlFor="deck-title">Deck name</FieldLabel>
-              <Input
-                id="deck-title"
-                name="title"
-                placeholder="e.g. Travel &amp; Airport"
-                required
-              />
-            </Field>
+        <Form<CreateDeckFormData>
+          className="py-6"
+          onSubmit={handleSubmit}
+          options={{
+            mode: "onChange",
+            resolver: zodResolver(createDeckSchema),
+          }}
+        >
+          <TextField<CreateDeckFormData>
+            name="name"
+            label="Title"
+            placeholder="e.g. Travel &amp; Airport"
+            className="mb-2"
+          />
+          <TextField<CreateDeckFormData>
+            name="description"
+            label="Description"
+            placeholder="What kind of words will live in this deck?"
+            type="textarea"
+            className="mb-2"
+          />
 
-            <Field>
-              <FieldLabel htmlFor="deck-description">Description</FieldLabel>
-              <Textarea
-                id="deck-description"
-                name="description"
-                rows={3}
-                placeholder="What kind of words will live in this deck?"
-              />
-              <FieldDescription>
-                Optional, but future-you will thank you.
-              </FieldDescription>
-            </Field>
-
-            <Field>
-              <FieldLabel>Level</FieldLabel>
-              <ToggleGroup
-                value={level}
-                onValueChange={setLevel}
-                variant="outline"
-                className="w-full"
-              >
-                {levels.map((item) => (
-                  <ToggleGroupItem key={item} value={item} className="flex-1">
-                    {item}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-            </Field>
-          </FieldGroup>
-
-          <DialogFooter>
+          <Field>
+            <FieldLabel>Level</FieldLabel>
+            <ToggleGroup
+              value={level}
+              onValueChange={setLevel}
+              variant="outline"
+              className="w-full"
+            >
+              {levels.map((item) => (
+                <ToggleGroupItem key={item} value={item} className="flex-1">
+                  {item}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </Field>
+          <div className="mt-7 flex justify-end items-end gap-2">
             <DialogClose
               render={<Button variant="ghost" size="lg" type="button" />}
             >
               Cancel
             </DialogClose>
-            <Button type="submit" size="lg">
+            <SubmitButton
+              isLoading={isLoading}
+              type="submit"
+              size="lg"
+              className={"w-fit"}
+            >
               Create deck
-            </Button>
-          </DialogFooter>
-        </form>
+            </SubmitButton>
+          </div>
+        </Form>
       </DialogContent>
     </Dialog>
   );

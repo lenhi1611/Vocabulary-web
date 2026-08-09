@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { StoreProvider } from "@/shared/store/StoreProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +33,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <StoreProvider>
-          <TooltipProvider>{children}</TooltipProvider>
+          <TooltipProvider>
+            <Toaster>{children}</Toaster>
+          </TooltipProvider>
         </StoreProvider>
       </body>
     </html>
