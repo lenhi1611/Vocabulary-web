@@ -5,7 +5,7 @@ import { createDeckInput, updateDeckInput } from "./deck.types";
 export const deckService = {
   getDecksByUserId: async (userId: string, page: number, limit: number) => {
     const skip = (page - 1) * limit;
-    const [decks, total] = await prisma.$transaction([
+    const [decks, total] = await Promise.all([
       prisma.deck.findMany({
         where: { userId },
         skip,

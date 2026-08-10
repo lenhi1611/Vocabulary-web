@@ -1,9 +1,71 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_ROUTES = ["/signin", "/signup"];
+type Access = "public" | "auth";
 
-const isPublicRoute = (pathname: string) => {
-    return PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
+type RouteRule = {
+  match: (pathname: string) => boolean;
+  access: Access;
+  // Only relevant when access === "public". If true (default), an
+  // authenticated user hitting this route is redirected to /dashboard —
+  // e.g. /signin shouldn't be visible once logged in. Set false for routes
+  // that stay visible either way, like the home page.
+  redirectIfAuthed?: boolean;
+  // Roles allowed to access this route. Omitted/empty = any authenticated user.
+  // Requires the JWT payload to carry a `role` claim (not yet issued by the server).
+  roles?: string[];
+};
+
+const exact = (path: string) => (pathname: string) => pathname === path;
+const prefix = (path: string) => (pathname: string) => pathname.startsWith(path);
+
+// Order matters: first matching rule wins. Anything that matches nothing
+// below falls through to DEFAULT_ACCESS.
+const ROUTES: RouteRule[] = [
+  { match: exact("/"), access: "public", redirectIfAuthed: false },
+  { match: prefix("/signin"), access: "public" },
+  { match: prefix("/signup"), access: "public" },
+
+  // Example of a future role-gated route — uncomment once the backend
+  // issues a `role` claim on the access token:
+  // { match: prefix("/admin"), access: "auth", roles: ["ADMIN"] },
+];
+
+const DEFAULT_ACCESS: Access = "auth";
+
+function resolveRoute(pathname: string): RouteRule {
+  return (
+    ROUTES.find((route) => route.match(pathname)) ?? {
+      match: () => true,
+      access: DEFAULT_ACCESS,
+    }
+  );
+}
+
+type AccessTokenPayload = {
+  userId: string;
+  email: string;
+  role?: string;
+};
+
+// Edge middleware can't verify the JWT signature (no Node crypto), so this
+// only decodes the payload for routing decisions. The server still verifies
+// the signature on every request via auth.middleware.ts — treat this as a
+// UX shortcut, never as the source of truth for authorization.
+function decodeAccessToken(token: string): AccessTokenPayload | null {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+    const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+function hasRequiredRole(rule: RouteRule, token: string): boolean {
+  if (!rule.roles || rule.roles.length === 0) return true;
+  const payload = decodeAccessToken(token);
+  return !!payload?.role && rule.roles.includes(payload.role);
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -27,15 +89,19 @@ async function tryRefreshAccessToken(refreshToken: string) {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isPublic = isPublicRoute(pathname);
+  const rule = resolveRoute(pathname);
   const token = request.cookies.get("access_token")?.value;
 
-  if(isPublic && token) {
-    // If the user is authenticated and trying to access a public route, redirect to the dashboard
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  if (rule.access === "public") {
+    if (token && rule.redirectIfAuthed !== false) {
+      // Already authenticated and trying to access a public-only route.
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+    return NextResponse.next();
   }
 
-  if(!isPublic && !token) {
+  // rule.access === "auth" from here on.
+  if (!token) {
     const refreshToken = request.cookies.get("refresh_token")?.value;
 
     if (refreshToken) {
@@ -47,18 +113,18 @@ export async function middleware(request: NextRequest) {
       }
     }
 
-    // If the user is not authenticated and trying to access a protected route, redirect to the signin page
     const signinUrl = new URL("/signin", request.url);
     signinUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(signinUrl);
+  }
 
+  if (!hasRequiredRole(rule, token)) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|api).*)",
-  ],
-}
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api).*)"],
+};
