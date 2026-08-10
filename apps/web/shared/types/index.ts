@@ -1,4 +1,8 @@
-import { DeckLevel } from "@prisma/client"
+export enum DeckLevel {
+  BEGINNER = "BEGINNER",
+  INTERMEDIATE = "INTERMEDIATE",
+  ADVANCED = "ADVANCED"
+}
 
 // ===== PAGINATION =====
 export type OffsetPagination = {
