@@ -1,8 +1,12 @@
 import axios, { AxiosError } from "axios";
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+// Requests go through the Next.js rewrite in next.config.ts (same-origin
+// "/api/*" proxied server-to-server to the backend), so the auth cookies
+// the API sets end up first-party on this app's own domain instead of the
+// backend's domain — required for the middleware to see them in production
+// where the frontend and backend are on different hosts.
 export const api = axios.create({
-  baseURL: `${baseURL}/api`,
+  baseURL: "/api",
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });
