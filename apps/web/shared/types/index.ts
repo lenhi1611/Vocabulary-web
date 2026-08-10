@@ -1,8 +1,4 @@
-export enum DeckLevel {
-  BEGINNER = "BEGINNER",
-  INTERMEDIATE = "INTERMEDIATE",
-  ADVANCED = "ADVANCED"
-}
+export type DeckLevel = "BEGINNER" | "INTERMEDIATE" | "ADVANCED"
 
 // ===== PAGINATION =====
 export type OffsetPagination = {
