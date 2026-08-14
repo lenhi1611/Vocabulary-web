@@ -58,7 +58,8 @@ export type Card = {
   id: string
   word: string
   phonetic: string | null
-  meaning: string
+  meaningVi: string
+  meaningEn: string | null
   example: string | null
   deckId: string
   createdAt: string
@@ -68,7 +69,8 @@ export type Card = {
 export type CreateCardInput = {
   word: string
   phonetic?: string
-  meaning: string
+  meaningVi: string
+  meaningEn?: string
   example?: string
 }
 
