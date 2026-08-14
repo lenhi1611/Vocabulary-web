@@ -41,7 +41,8 @@ export function WordList({
     return words.filter(
       (word) =>
         word.word.toLowerCase().includes(search) ||
-        word.meaning.toLowerCase().includes(search),
+        word.meaningVi.toLowerCase().includes(search) ||
+        word.meaningEn?.toLowerCase().includes(search),
     );
   }, [words, query]);
 

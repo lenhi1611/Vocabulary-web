@@ -41,8 +41,8 @@ export const cardService = {
     };
   },
   async createCard(input: CreateCardInput) {
-    const { word, meaning, userId, deckId, ...rest } = input;
-    if (!word.trim() || !meaning.trim()) {
+    const { word, meaningVi, userId, deckId, ...rest } = input;
+    if (!word.trim() || !meaningVi.trim()) {
       throw new BadRequestError("Word and meaning are required");
     }
     const deck = await prisma.deck.findUnique({
@@ -57,7 +57,7 @@ export const cardService = {
     return prisma.card.create({
       data: {
         word: word.trim(),
-        meaning: meaning.trim(),
+        meaningVi: meaningVi.trim(),
         deckId,
         ...rest,
       },
@@ -82,7 +82,10 @@ export const cardService = {
         ...(input.phonetic !== undefined && {
           phonetic: input.phonetic?.trim(),
         }),
-        ...(input.meaning && { meaning: input.meaning.trim() }),
+        ...(input.meaningVi && { meaningVi: input.meaningVi.trim() }),
+        ...(input.meaningEn !== undefined && {
+          meaningEn: input.meaningEn?.trim(),
+        }),
         ...(input.example !== undefined && { example: input.example?.trim() }),
       },
     });

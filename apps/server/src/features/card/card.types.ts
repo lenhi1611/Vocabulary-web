@@ -1,6 +1,7 @@
 export type CreateCardInput = {
     word: string;
-    meaning: string;
+    meaningVi: string;
+    meaningEn?: string;
     phonetic: string;
     example?: string;
     userId: string;
@@ -9,7 +10,8 @@ export type CreateCardInput = {
 
 export type UpdateCardInput = {
     word?: string;
-    meaning?: string;
+    meaningVi?: string;
+    meaningEn?: string;
     phonetic?: string;
     example?: string;
 }

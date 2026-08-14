@@ -93,7 +93,12 @@ export function WordListItem({ word }: { word: CardType }) {
             </DropdownMenu>
           </div>
 
-          <p className="text-sm leading-relaxed">{word.meaning}</p>
+          <p className="text-sm leading-relaxed">{word.meaningVi}</p>
+          {word.meaningEn ? (
+            <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
+              {word.meaningEn}
+            </p>
+          ) : null}
           {word.example ? (
             <p className="text-sm leading-relaxed text-muted-foreground italic">
               &ldquo;{word.example}&rdquo;

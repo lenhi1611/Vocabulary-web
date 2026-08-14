@@ -19,12 +19,14 @@ import {
   createCardSchema,
 } from "@/features/card/schemas/card.schema";
 import { CardFormFields } from "@/features/card/components/CardFormFields";
+import { useWordLookup } from "@/features/card/hooks/useWordLookup";
 import { createCard, selectCreateCardLoading } from "../store/card.slice";
 
 const emptyValues: CreateCardFormData = {
   word: "",
   phonetic: "",
-  meaning: "",
+  meaningVi: "",
+  meaningEn: "",
   example: "",
 };
 
@@ -122,24 +124,59 @@ function AddWordFormBody({
   onIntentChange: (intent: SubmitIntent) => void;
   resetFormRef: React.RefObject<() => void>;
 }) {
-  const { watch, reset, setFocus } = useRHFContext<CreateCardFormData>();
+  const { watch, reset, setFocus, setValue, getValues } =
+    useRHFContext<CreateCardFormData>();
   const preview = watch();
+  const {
+    suggestion,
+    isLoading: isLookingUp,
+    lookup,
+    clearSuggestion,
+  } = useWordLookup();
 
   useEffect(() => {
     resetFormRef.current = () => {
       reset(emptyValues);
+      clearSuggestion();
       setFocus("word");
     };
-  }, [reset, setFocus, resetFormRef]);
+  }, [reset, setFocus, resetFormRef, clearSuggestion]);
+
+  useEffect(() => {
+    lookup(preview.word ?? "");
+  }, [preview.word, lookup]);
+
+  // Only fill fields the user hasn't already typed into — never clobber
+  // manual edits with a dictionary suggestion that arrives later.
+  useEffect(() => {
+    if (!suggestion) return;
+    const current = getValues();
+    if (suggestion.phonetic) {
+      setValue("phonetic", suggestion.phonetic, { shouldDirty: true });
+    }
+    if ( suggestion.meaningVi) {
+      setValue("meaningVi", suggestion.meaningVi, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
+    if (suggestion.meaningEn) {
+      setValue("meaningEn", suggestion.meaningEn, { shouldDirty: true });
+    }
+  }, [suggestion, getValues, setValue]);
 
   return (
     <>
       <Card className="lg:col-span-2">
         <CardHeader>
-          <CardTitle className="font-display text-lg">Word information</CardTitle>
+          <CardTitle className="font-display text-lg">
+            Word information
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <CardFormFields />
+          <CardFormFields
+            wordHelperText={isLookingUp ? "Đang tra từ điển..." : undefined}
+          />
 
           <div className="flex flex-wrap items-center justify-end gap-2">
             <SubmitButton
@@ -184,8 +221,15 @@ function AddWordFormBody({
             {preview.phonetic?.trim() ? (
               <p className="mt-1 text-sm text-primary">{preview.phonetic}</p>
             ) : null}
-            {preview.meaning?.trim() ? (
-              <p className="mt-3 text-sm leading-relaxed">{preview.meaning}</p>
+            {preview.meaningVi?.trim() ? (
+              <p className="mt-3 text-sm leading-relaxed">
+                {preview.meaningVi}
+              </p>
+            ) : null}
+            {preview.meaningEn?.trim() ? (
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
+                {preview.meaningEn}
+              </p>
             ) : null}
             {preview.example?.trim() ? (
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground italic">

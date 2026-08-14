@@ -87,8 +87,13 @@ export function FlashCard({ card, topicLabel, isRevealed, onToggleReveal }: Flas
             <div className="h-px w-full bg-border" />
             <div className="flex flex-col gap-3">
               <p className="text-lg leading-relaxed font-semibold">
-                {card.meaning}
+                {card.meaningVi}
               </p>
+              {card.meaningEn ? (
+                <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
+                  {card.meaningEn}
+                </p>
+              ) : null}
               {card.example ? (
                 <p className="text-sm leading-relaxed text-muted-foreground italic">
                   &ldquo;{card.example}&rdquo;
