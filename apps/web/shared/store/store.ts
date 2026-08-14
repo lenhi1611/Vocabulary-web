@@ -3,6 +3,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { authReducer } from "@/features/auth/store/auth.slice";
 import { deckReducer } from "@/features/deck/store/deck.slice";
 import { cardReducer } from "@/features/card/store/card.slice";
+import { studyReducer } from "@/features/study/store/study.slice";
 
 export function makeStore() {
   return configureStore({
@@ -10,6 +11,7 @@ export function makeStore() {
       auth: authReducer,
       deck: deckReducer,
       card: cardReducer,
+      study: studyReducer,
     },
   });
 }

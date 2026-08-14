@@ -1,4 +1,4 @@
-export type StudyRating = "again" | "hard" | "good" | "easy";
+export type StudyRating = 0 | 1 | 2 | 3;
 
 export type StudyRatingOption = {
   key: StudyRating;
@@ -15,25 +15,25 @@ export type StudyRatingOption = {
  */
 export const STUDY_RATING_OPTIONS: StudyRatingOption[] = [
   {
-    key: "again",
+    key: 0,
     label: "Again",
     intervalLabel: "1 min",
     className: "bg-destructive/10 text-destructive hover:bg-destructive/20",
   },
   {
-    key: "hard",
+    key: 1,
     label: "Hard",
     intervalLabel: "6 min",
     className: "bg-accent/20 text-accent-foreground hover:bg-accent/30",
   },
   {
-    key: "good",
+    key: 2,
     label: "Good",
     intervalLabel: "1 day",
     className: "bg-primary/10 text-primary hover:bg-primary/20",
   },
   {
-    key: "easy",
+    key: 3,
     label: "Easy",
     intervalLabel: "4 days",
     className: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
@@ -41,4 +41,4 @@ export const STUDY_RATING_OPTIONS: StudyRatingOption[] = [
 ];
 
 /** Ratings that count as a successful recall for the accuracy stat. */
-export const REMEMBERED_RATINGS: StudyRating[] = ["good", "easy"];
+export const REMEMBERED_RATINGS: StudyRating[] = [2, 3];
