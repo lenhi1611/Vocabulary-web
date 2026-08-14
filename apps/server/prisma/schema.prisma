@@ -56,12 +56,31 @@ model Card {
   id           String   @id @default(cuid())
   word         String
   phonetic     String?  // /həˈloʊ/
-  meaning      String   // nghĩa tiếng Việt
-  example      String?  // câu ví dụ
+  meaningVi    String 
+  meaningEn    String?  // English definition
+  example      String?
   deckId       String
   deck         Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+
+   // Spaced repetition fields
+  ease        Float         @default(2.5)
+  interval    Int           @default(1)
+  repetitions Int           @default(0)
+  nextReview  DateTime      @default(now())
+  reviews     CardReview[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   @@index([deckId])
+  @@index([nextReview])
+}
+
+model CardReview {
+  id        String   @id @default(cuid())
+  cardId    String
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  rating    Int      // 0=Again, 1=Hard, 2=Good, 3=Easy
+  createdAt DateTime @default(now())
+
+  @@index([cardId])
 }

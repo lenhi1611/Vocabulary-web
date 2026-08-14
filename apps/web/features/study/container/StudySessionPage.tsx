@@ -33,6 +33,7 @@ import { RatingButtons } from "@/features/study/components/RatingButtons";
 import { StudyNavArrow } from "@/features/study/components/StudyNavArrow";
 import { SessionStatsPanel } from "@/features/study/components/SessionStatsPanel";
 import { StudyComplete } from "@/features/study/components/StudyComplete";
+import { fetchSessionStats, fetchStudyCards, selectFetchStudyCardsLoading, selectSessionStats, selectStudyCards } from "../store/study.slice";
 
 export function StudySessionPage({ deckId }: { deckId: string }) {
   const dispatch = useAppDispatch();
@@ -41,29 +42,36 @@ export function StudySessionPage({ deckId }: { deckId: string }) {
   const isDeckLoading = useAppSelector(selectFetchDeckLoading);
   const deckError = useAppSelector(selectFetchDeckError);
 
-  const cards = useAppSelector(selectCards);
-  const isFetchingCards = useAppSelector(selectFetchCardsLoading);
-  const isFetchingMoreCards = useAppSelector(selectFetchMoreCardsLoading);
-  const hasMoreCards = useAppSelector(selectHasMoreCards);
+  const cards = useAppSelector(selectStudyCards);
+  const isFetchingCards = useAppSelector(selectFetchStudyCardsLoading);
+
+  const backendStats = useAppSelector(selectSessionStats)
 
   useEffect(() => {
     dispatch(fetchDeckById(deckId));
-    dispatch(fetchCards(deckId));
+    dispatch(fetchStudyCards(deckId));
   }, [dispatch, deckId]);
 
   // A study session needs the whole deck, not just the first page — keep
   // paging through card.slice's cursor until nothing is left to fetch.
-  useEffect(() => {
-    if (!isFetchingCards && !isFetchingMoreCards && hasMoreCards) {
-      dispatch(fetchMoreCards(deckId));
-    }
-  }, [dispatch, deckId, isFetchingCards, isFetchingMoreCards, hasMoreCards]);
+  // useEffect(() => {
+  //   if (!isFetchingCards && !isFetchingMoreCards && hasMoreCards) {
+  //     dispatch(fetchMoreCards(deckId));
+  //   }
+  // }, [dispatch, deckId, isFetchingCards, isFetchingMoreCards, hasMoreCards]);
 
-  const isPreparingCards = isFetchingCards || isFetchingMoreCards || hasMoreCards;
+  // const isPreparingCards = isFetchingCards || isFetchingMoreCards || hasMoreCards;
 
   const session = useStudySession(cards);
 
-  if (isDeckLoading || isPreparingCards) {
+  useEffect(()=> {
+    if(session.isComplete){
+      dispatch(fetchSessionStats(deckId))
+    }
+  }, [dispatch, deckId, session.isComplete])
+
+
+  if (isDeckLoading || isFetchingCards) {
     return (
       <div className="flex items-center justify-center gap-2 py-24 text-sm text-muted-foreground">
         <Loader2 className="size-4 animate-spin" />
@@ -72,7 +80,7 @@ export function StudySessionPage({ deckId }: { deckId: string }) {
     );
   }
 
-  if (deckError || !deck) {
+  if (deckError || !deck || !deck) {
     return (
       <div className="flex flex-col items-center gap-2 py-24 text-center">
         <p className="text-sm text-destructive">
@@ -117,7 +125,7 @@ export function StudySessionPage({ deckId }: { deckId: string }) {
       {session.isComplete ? (
         <StudyComplete
           deckId={deckId}
-          stats={session.stats}
+          stats={backendStats ?? session.stats}
           onRestart={session.restart}
         />
       ) : (

@@ -72,7 +72,8 @@ export function EditCardDialog({
           defaultValues={{
             word: card.word,
             phonetic: card.phonetic ?? "",
-            meaning: card.meaning,
+            meaningVi: card.meaningVi,
+            meaningEn: card.meaningEn ?? "",
             example: card.example ?? "",
           }}
           options={{

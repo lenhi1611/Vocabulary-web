@@ -3,6 +3,8 @@
 import { useCallback, useMemo, useState } from "react";
 import { REMEMBERED_RATINGS, StudyRating } from "@/features/study/constants";
 import type { Card } from "@/shared/types";
+import { useAppDispatch } from "@/shared/store/hooks";
+import { submitReview } from "../store/study.slice";
 
 export type StudySessionStats = {
   reviewed: number;
@@ -18,6 +20,7 @@ export type StudySessionStats = {
  * card after navigating back never double-counts it in the stats.
  */
 export function useStudySession(cards: Card[]) {
+  const dispatch = useAppDispatch()
   const [index, setIndex] = useState(0);
   const [isRevealed, setIsRevealed] = useState(false);
   const [ratings, setRatings] = useState<Record<string, StudyRating>>({});
@@ -34,6 +37,8 @@ export function useStudySession(cards: Card[]) {
       setRatings((prev) => ({ ...prev, [currentCard.id]: rating }));
       setIsRevealed(false);
       setIndex((current) => current + 1);
+
+      dispatch(submitReview({cardId: currentCard.id, rating: rating}))
     },
     [currentCard],
   );
