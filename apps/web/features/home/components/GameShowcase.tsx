@@ -57,7 +57,7 @@ export function GameShowcase() {
           <Button
             size="lg"
             className="h-11 px-5 text-base"
-            render={<Link href="/decks/ielts-academic/game" />}
+            render={<Link href="/demo" />}
           >
             Play a demo round
           </Button>

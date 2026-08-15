@@ -57,7 +57,7 @@ export function Hero() {
               size="lg"
               variant="outline"
               className="h-11 px-5 text-base"
-              render={<Link href="/decks/business-english/game" />}
+              render={<Link href="/demo" />}
             >
               <Gamepad2 data-icon="inline-start" />
               Try the game
