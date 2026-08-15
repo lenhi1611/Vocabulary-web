@@ -34,9 +34,9 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { currentUser } from "@/lib/mock-data";
-import { logout } from "@/features/auth/store/auth.slice";
-import { useAppDispatch } from "@/shared/store/hooks";
+import { logout, selectCurrentUser } from "@/features/auth/store/auth.slice";
+import { useAppDispatch, useAppSelector } from "@/shared/store/hooks";
+import { getInitials } from "@/shared/utils";
 
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -50,7 +50,11 @@ export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const authUser = useAppSelector(selectCurrentUser);
   const { open, isMobile } = useSidebar();
+
+  const displayName = authUser?.fullName || authUser?.email || "Guest";
+  const initials = getInitials(displayName);
 
   const handleLogout = async () => {
     await dispatch(logout());
@@ -60,7 +64,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <Brand className="px-2 py-1.5" showText={open} />
+        <Brand className="px-0 py-1.5" showText={open} />
       </SidebarHeader>
 
       <SidebarContent>
@@ -96,14 +100,14 @@ export function AppSidebar() {
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <SidebarMenuButton size="lg" tooltip={currentUser.name} />
+                  <SidebarMenuButton size="lg" tooltip={displayName} />
                 }
               >
                 <Avatar className="size-6">
-                  <AvatarFallback>{currentUser.initials}</AvatarFallback>
+                  <AvatarFallback>{initials}</AvatarFallback>
                 </Avatar>
                 <span className="truncate font-medium group-data-[collapsible=icon]:hidden">
-                  {currentUser.name}
+                  {displayName}
                 </span>
               </DropdownMenuTrigger>
               <DropdownMenuContent
