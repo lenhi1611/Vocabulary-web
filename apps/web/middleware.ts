@@ -22,6 +22,7 @@ const prefix = (path: string) => (pathname: string) => pathname.startsWith(path)
 // below falls through to DEFAULT_ACCESS.
 const ROUTES: RouteRule[] = [
   { match: exact("/"), access: "public", redirectIfAuthed: false },
+  { match: prefix("/demo"), access: "public", redirectIfAuthed: false },
   { match: prefix("/signin"), access: "public" },
   { match: prefix("/signup"), access: "public" },
 
@@ -126,5 +127,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api|.*\\..*).*)"],
 };

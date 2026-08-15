@@ -1,10 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Flame, Gamepad2, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/shared/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/shared/components/motion/Stagger";
+import { HeroIllustration } from "./hero-illustration/HeroIllustration";
 
 const stats = [
   { value: "12k+", label: "Learners studying daily" },
@@ -57,7 +57,7 @@ export function Hero() {
               size="lg"
               variant="outline"
               className="h-11 px-5 text-base"
-              render={<Link href="/decks/business-english/game" />}
+              render={<Link href="/demo" />}
             >
               <Gamepad2 data-icon="inline-start" />
               Try the game
@@ -81,21 +81,12 @@ export function Hero() {
         </Stagger>
 
         <Reveal variant="fade-left" delay={0.15} className="relative">
-          <div className="relative overflow-hidden rounded-3xl bg-secondary ring-1 ring-foreground/10">
-            <Image
-              src="/images/hero-flashcards.png"
-              alt="Illustration of a learner holding an English flashcard surrounded by floating vocabulary cards"
-              width={900}
-              height={900}
-              priority
-              className="h-auto w-full"
-            />
-          </div>
+          <HeroIllustration />
 
           <Reveal
             variant="scale-in"
             delay={0.55}
-            className="absolute -left-3 top-8 sm:-left-6"
+            className="absolute -left-4 sm:-left-6"
           >
             <div className="animate-float-soft flex items-center gap-2 rounded-2xl bg-card px-3 py-2 shadow-lg ring-1 ring-foreground/10">
               <span className="flex size-8 items-center justify-center rounded-xl bg-accent text-accent-foreground">
@@ -109,19 +100,6 @@ export function Hero() {
                   Keep it up!
                 </span>
               </div>
-            </div>
-          </Reveal>
-
-          <Reveal
-            variant="scale-in"
-            delay={0.7}
-            className="absolute -right-2 bottom-10 sm:-right-5"
-          >
-            <div className="animate-float-soft rounded-2xl bg-card px-4 py-3 shadow-lg ring-1 ring-foreground/10">
-              <p className="font-display text-sm font-semibold">mitigate</p>
-              <p className="text-xs text-muted-foreground">
-                /ˈmɪtɪɡeɪt/ · verb
-              </p>
             </div>
           </Reveal>
         </Reveal>

@@ -45,6 +45,8 @@ import {
 } from "@/features/deck/store/deck.slice";
 import { useAppDispatch, useAppSelector } from "@/shared/store/hooks";
 import type { Deck } from "@/shared/types";
+import { GAME_MODES } from "@/features/game/constants";
+import GameSelectModal from "@/features/game/components/GameSelectModal";
 
 function formatLevel(level: Deck["level"]) {
   return level.charAt(0) + level.slice(1).toLowerCase();
@@ -55,6 +57,7 @@ export function DeckCard({ deck }: { deck: Deck }) {
   const isDeleting = useAppSelector(selectDeleteDeckLoading);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [gameOpen, setGameOpen] = useState(false);
   const cardCount = deck._count?.cards ?? 0;
 
   async function handleDelete() {
@@ -143,7 +146,7 @@ export function DeckCard({ deck }: { deck: Deck }) {
           size="sm"
           variant="outline"
           className="flex-1"
-          render={<Link href={`/decks/${deck.id}/game`} />}
+          onClick={() => setGameOpen(true)}
         >
           <Gamepad2 data-icon="inline-start" />
           Play
@@ -151,6 +154,14 @@ export function DeckCard({ deck }: { deck: Deck }) {
       </CardFooter>
 
       <EditDeckDialog deck={deck} open={editOpen} onOpenChange={setEditOpen} />
+
+      {gameOpen && (
+        <GameSelectModal
+          deck={deck}
+          gameModes={GAME_MODES}
+          onClose={() => setGameOpen(false)}
+        />
+      )}
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
